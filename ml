@@ -1,364 +1,278 @@
-KMEAN----
-import numpy as np
-import pandas as pd
-from copy import deepcopy
-k=3
-import random as rd
+PART-A
+1> mean mode median
+import statistics as st
+x=[115.3, 195.5, 120.5, 110.2, 90.4, 105.6, 110.9, 116.3, 122.3, 125.4,90.4]
+mean=sum(x)/len(x)
+print(mean)
+print(st.mean(x))
+def median(x):
+    x.sort()
+    if len(x)%2==0:
+        return (x[int(len(x)//2)-1]+x[int((len(x)+1)//2)-1])/2
+    else:
+        return x[(len(x)+1)//2-1]
+med=median(x)
+print(med)
+print(st.median(x))
+y=list(set(x))
+mx=0
+mode=0
+for i in y:
+    if x.count(i)>=mx:
+        mx=x.count(i)
+        mode=i
+    else:
+        continue   
+print(mode)
+print(st.mode(x))
+var=0
+s=0
+for i in x:
+    s+=(i-mean)**2
+var=s/(len(x)-1)
+print(var)
+print(st.variance(x))
+print(var**0.5)
+print(st.stdev(x))
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+x_r=[[c]for c in x]
+mm_sc=MinMaxScaler()
+s_sc=StandardScaler()
+mms=mm_sc.fit_transform(x_r)
+ss=s_sc.fit_transform(x_r)
+mms=[v[0] for v in mms]
+ss=[v[0] for v in ss]
+print(mms)
+print(ss)
+minv=min(x)
+maxv=max(x)
+MMS=[]
+SS=[]
+for i in x:
+    MMS.append((i-minv)/(maxv-minv))
+    SS.append((i-st.mean(x))/st.stdev(x))
+print(MMS)
+print(SS)
+-------------------------------------------------------
+2>linear regression
 import matplotlib.pyplot as plt
-X = pd.read_csv('kmeans.csv')
-print(X)
-X = X[["X1","X2"]]
-#Visualise data points
-plt.scatter(X["X1"],X["X2"],c='black')
-plt.xlabel('AnnualIncome')
-plt.ylabel('Loan Amount (In Thousands)')
-plt.show()
-x1 = X['X1'].values
-x2 = X['X2'].values
-x1
-x2
-X = np.array(list(zip(x1, x2)))
-print(X)
-C_x = [6.2, 6.6 ,6.5]
-C_y = [3.2, 3.7, 3.0]
-Centroid = np.array(list(zip(C_x, C_y)), dtype=np.float32)
-print("Initial Centroids")
-print(Centroid.shape)
-Centroid
-type(Centroid)
-Centroid_old = np.zeros(Centroid.shape)
-print(Centroid_old)
-clusters = np.zeros(len(X))
-print(clusters)
-def euclidean(a,b, ax=1):
-    return np.linalg.norm(a-b, axis=ax)
-error = euclidean(Centroid, Centroid_old,None)
-print(error)
-iterr = 0
+import pandas as pd
+import numpy as np
+df=pd.read_csv(r"C:\Users\amana\Downloads\Food-Truck(For Linear Regression Program).csv",names=['a','b'])
+x=df['a']
+y=df['b']
+x_mean=st.mean(x)
+y_mean=st.mean(y)
+plt.scatter(x,y)
+n=0
+d=0
+for i in range(len(x)):
+    n+=(x[i]-x_mean)*(y[i]-y_mean)
+    d+=(x[i]-x_mean)**2
+m=n/d
+c=y_mean-m*x_mean
+line=[]
+for i in x:
+    line.append(m*i+c)
+plt.scatter(x,y,label='points',color='r')
+plt.plot(x,line,label='line')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+nm=st.mean(line)
+sse=0
+ssr=0
+sst=0
+for i in range(len(y)):
+    sse+=(y[i]-line[i])**2
+for i in range(len(line)):
+    ssr+=(line[i]-nm)**2
+for i in range(len(y)):
+    sst+=(y[i]-y_mean)**2
+r_sq=1-(sse/sst)
+print(sse,ssr,sst,r_sq)
+------------------------------------------------------------
+3>Decision tree
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+import pandas as pd
+import numpy as np
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+df=pd.read_csv(r"C:\Users\amana\Downloads\zoo_data(For Decision Tree Program).csv")
+df
+X=df.drop('1.7',axis=1)
+Y=df["1.7"]
+x_train,x_test,y_train,y_test=train_test_split(X,Y,test_size=0.3,random_state=100)
+clf_entropy=DecisionTreeClassifier(criterion='entropy',random_state=100,max_depth=3,min_samples_leaf=5)
+clf_entropy.fit(x_train,y_train)
+y_pred=clf_entropy.predict(x_test)
+print('confusion matrix: ',confusion_matrix(y_test,y_pred))
+print('classification report: ',classification_report(y_test,y_pred))
+print('accuracy: ',accuracy_score(y_test,y_pred)*100)
+------------------------------------------------------------------------
+4>K Mean
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from copy import deepcopy
+import random as rd
+k=3
+data=pd.DataFrame({"X1":[5.9, 4.6, 6.2, 4.7, 5.5, 5. , 4.9, 6.7, 5.1, 6.],"X2":[3.2, 2.9, 2.8, 3.2, 4.2, 3. , 3.1, 3.1, 3.8, 3. ]})
+print(data["X1"])
+X=np.array(list(zip(data["X1"],data["X2"])))
+X
+cent=np.array(list(zip([6.2, 6.6 ,6.5],[3.2, 3.7, 3.0])))
+cent_old=np.zeros(cent.shape)
+clusters=np.zeros(len(X))
+print(clusters,cent,cent_old)
+def eucl(a,b,ax=1):
+    return np.linalg.norm(a-b,axis=ax)
+error=eucl(cent,cent_old,None)
+
+iterr=0
 while error != 0:
-        # Assigning each value to its closest cluster
+        
         iterr = iterr + 1
         for i in range(len(X)):
-            #print("Data Points")
-            #print(X[i])
-            distances = euclidean(X[i], Centroid)
-            #print("Distances")
-            #print(distances)
+            distances = eucl(X[i], cent)
             cluster = np.argmin(distances)
             clusters[i] = cluster
-        Centroid_old = deepcopy(Centroid)
+        cent_old = deepcopy(cent)
         print("Old Centroid")
-        print(Centroid_old)
+        print(cent)
             
         
         # Finding the new centroids by taking the Mean
         for p in range(k):
             points = [X[j] for j in range(len(X)) if clusters[j] == p]
-            Centroid[p] = np.mean(points, axis=0)
-        print(" New Centroids after ", iterr," Iteration \n", Centroid)
-        error = euclidean(Centroid, Centroid_old, None)
+            cent[p] = np.mean(points, axis=0)
+        print(" New Centroids after ", iterr," Iteration \n", cent)
+        error = eucl(cent, cent_old, None)
         print("Error  ... ",error)
         print("Data points belong to which cluster")
         print(clusters)
         print("********************************************************")
-X = pd.read_csv('kmeans.csv')
-X = X[["X1","X2"]]
-#Visualise data points
-plt.scatter(X["X1"],X["X2"],c=clusters)
-plt.xlabel('AnnualIncome')
-plt.ylabel('Loan Amount (In Thousands)')
-plt.show()
---------------------------------------------
-Mean mode------
-x=[115.3, 195.5, 120.5, 110.2, 90.4, 105.6, 110.9, 116.3, 122.3, 125.4,90.4]
-mean = sum(x) / len(x)
-mean
-import statistics
-print(statistics.mean(x))
-x.sort()
-x
-n=len(x)
-if  n% 2 == 0:
-    median1 = x[n//2]
-    median2 = x[n//2 - 1]
-    median = (median1 + median2)/2
-else:
-    median = x[n//2]
-print("Median is: " + str(median))
-print(statistics.median(x))
-frequency = {}
-for value in x:
-        frequency[value] = frequency.get(value, 0) + 1
-frequency
-frequencs=list(frequency.values())
-print(frequencs)
-most_frequent = max(frequencs)
-most_frequent
-modes = [key for key, value in frequency.items()
-                      if value == most_frequent]
-modes
-print(statistics.mode(x))
-variance = sum((i - mean) ** 2 for i in x) / (n-1)
-variance
-print(statistics.variance(x))
-standarddev= variance ** 0.5
-standarddev
-print(statistics.stdev(x))
-import numpy as np
-max = np.max(x)
-min = np.min(x)
-scaled_arr = np.array([(i - min) / (max - min) for i in x])
-print(scaled_arr)
-x=[[-1, 2], [-0.5, 6], [0, 10], [1, 18]]
-from sklearn.preprocessing import MinMaxScaler
-scaler = MinMaxScaler()
-# transform data
-scaled = scaler.fit_transform(x)
-print(scaled)
-X=[115.3, 195.5, 120.5, 110.2, 90.4, 105.6, 110.9, 116.3, 122.3, 125.4,90.4]
-for i in range(len(X)):
-        X[i] = (X[i] - statistics.mean(X)) /(statistics.stdev(X))
-X=[115.3, 195.5, 120.5, 110.2, 90.4, 105.6, 110.9, 116.3, 122.3, 125.4,90.4]
-stand_arr = np.array([(i -statistics.mean(X) ) / (statistics.stdev(X)) for i in X])
-stand_arr
-print(round(statistics.mean(stand_arr),2))
-from numpy import asarray
-from sklearn.preprocessing import StandardScaler
-# define data
-data = asarray([[100, 0.001],
-[8, 0.05],
-[50, 0.005],
-[88, 0.07],
-[4, 0.1]])
-print(data)
-# define standard scaler
-scaler = StandardScaler()
-# transform 
-
-scaled = scaler.fit_transform(data)
-print(scaled)
-print(round(np.mean(scaled),5))
-print(np.std(scaled))
-----------------------------------------
-Linear Regression
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-df = pd.read_csv("C:/Users/vikas/Desktop/Food-Truck.csv")
-class Mocd:
-    
-    def mean_(self, x):
-        sum = 0
-        for ele in x:
-            sum += ele
-        mean = sum / len(x)
-        return mean
-    
-    def standard_deviation(self, x):
-        sd = 0
-        m = self.mean_(x)
-        for xi in x:
-            sd += (xi - m)**2
-        sd = sd/len(x)
-        return sd
-    
-    def slope_(self,x,y):
-        x_mean = self.mean_(x)
-        y_mean = self.mean_(y)
-        
-        numerator = 0
-        denominator = 0
-        
-        for xi, yi in zip(x,y):
-            numerator += (xi-x_mean)*(yi-y_mean)
-            denominator += (xi-x_mean)**2
-        slope = 0
-        slope = numerator/denominator
-        return slope
-    
-    def intercept_(self, x,y):
-        x_mean = self.mean_(x)
-        y_mean = self.mean_(y)
-        
-        slope = self.slope_(x,y)
-        intercept = y_mean - (slope * x_mean)
-        return intercept
-    
-    def ssr_(self, x, y):
-        ssr = 0
-        y_pred = self.primitive_linear_regression(x,y)
-        for yi, yi_cap in zip(y, y_pred):
-            ssr += (yi - yi_cap)**2
-        return ssr
-    
-    def sst_(self, x, y):
-        sst = 0
-        y_mean = self.mean_(y)
-        for yi in y:
-            sst += (yi - y_mean)**2
-        return sst
-    
-    def r2_(self, x, y):
-        r2 = 0
-        ssr = self.ssr_(x,y)
-        sst = self.sst_(x,y)
-        
-        r2 = 1 - (ssr / sst)
-        return r2
-    
-    def primitive_linear_regression(self, x,y):
-        y_pred = []
-        m = self.slope_(x, y)
-        c = self.intercept_(x, y)
-        for xi in x:
-            y_pred.append((m*xi) + c)
-        return y_pred
-    
-    def summary_(self, x, y):
-        print("-"*55)
-        print("X Mean :", self.mean_(x))
-        print("y Mean :", self.mean_(y))
-        print("")
-        print("X Standard Deviation :", self.standard_deviation(x))
-        print("y Standard Deviation :", self.standard_deviation(y))
-        print("")
-        print("Slope :", self.slope_(x,y))
-        print("Intercept :", self.intercept_(x,y))
-        print("Sum squared error :", self.ssr_(x,y))
-        print("Sum squared total :", self.sst_(x,y))
-        print("coefficient of determination - R2 :", self.r2_(x,y))
-        print("-"*55)        
-df.head()
-X = df['Attribute']
-y = df['Label']
-obj = Mocd()
-res = obj.r2_(X,y)
-res
-obj.summary_(X,y)
-plt.scatter(X, y)
-plt.plot(X, obj.primitive_linear_regression(X, y), c = 'red')
-plt.show()
-------------------------------------------
-Logistic
+------------------------------------------------------------------
+5>PCA
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-df = pd.read_csv("Log_reg.csv")
-df.head()
-df['Target'].value_counts()
-list(X.columns)
-class Logistic_Regression:
-    
-    def __init__(self, w1, w2, b):
-        self.w1 = w1
-        self.w2 = w2
-        self.b = b
-        self.loss_list = []
-        self.w1_list = []
-        self.w2_list = []
-        self.b_list = []
-        self.y_pred_list = []
-        
-    def cost_function(self, target, attribute1, attribute2):
-        cost = 0
-        m = len(target)
-        
-        for y_actual, x1, x2 in zip(target, attribute1, attribute2):
-            if (1 - self.sigmoid(x1, x2)) > 0 and self.sigmoid(x1, x2) > 0:
-                cost += (y_actual * math.log(self.sigmoid(x1, x2))) + ((1 - y_actual) * math.log(1 - self.sigmoid(x1, x2)))
-            elif (1 - self.sigmoid(x1, x2)) < 0 and self.sigmoid(x1, x2) > 0:
-                cost += (y_actual * math.log(self.sigmoid(x1, x2)))
-            elif (1 - self.sigmoid(x1, x2)) > 0 and self.sigmoid(x1, x2) < 0:
-                cost += ((1 - y_actual) * math.log(1 - self.sigmoid(x1, x2)))
-        
-        cost_function = -(1 / m) * cost
-        self.loss_list.append(cost_function)
-        
-        # print("Loss :", cost_function)    
-        
-    def linear_eqn(self, x1, x2):
-        y = self.w1 * x1 + self.w2 * x2 + self.b
-        return y
-    
-    def sigmoid(self, x1, x2):
-        y = self.linear_eqn(x1, x2)
-        
-        try:
-            y_pred = 1 / (1+ math.exp(-y))
-        except OverflowError:
-            y_pred = 1 / (1+ math.exp(-700))
-        
-        
-        return y_pred
-    
-    def weights(self, alpha, target, attribute1, attribute2, iters):
-        
-        error1 = 0
-        error2 = 0
-        error3 = 0
-        m = len(target)
-        
-        for y_actual, x1, x2 in zip(target, attribute1, attribute2):
-            y_pred = self.sigmoid(x1, x2)
-            
-            error1 += (y_pred - y_actual) * x1
-            error2 += (y_pred - y_actual) * x2
-            error3 += (y_pred - y_actual)
-        old_loss = 0
-        loss = 0
-        
-        while iters != 0:
-            
-            
-            self.w1 = self.w1 - (alpha / m) * error1
-            self.w2 = self.w2 - (alpha / m) * error2       
-            self.b = self.b - (alpha / m) * error3  
-        
-            self.w1_list.append(self.w1)
-            self.w2_list.append(self.w2)
-            self.b_list.append(self.b)
-            old_loss = loss
-            loss = self.cost_function(target, attribute1, attribute2)
-            iters -= 1
-    
-    def custom_compile(self, X, y, iters = 100, alpha = 0.1):
-        target = y
-        attribute1 = X['Attribute 1']
-        attribute2 = X['Attribute 2']
-        
-        
-        self.weights( alpha, target, attribute1, attribute2, iters)
-        
-    def accuracy(self, y_actual, X):
-        m = len(y_actual)
-        correct = 0
-        
-        for x1, x2 in zip(X['Attribute 1'], X['Attribute 2']):
-            y_pred = self.sigmoid(x1, x2)
-            self.y_pred_list.append(y_pred)
-            
-        for i,j in zip(y_actual, self.y_pred_list):
-            if i == j:
-                correct += 1
-
-        print("Accuracy :", correct/m)
-        return correct/m
-    
-    def predict(self, X):
-        prediction = self.sigmoid(X[0], X[1])
-        print(prediction)
-obj = Logistic_Regression(1, 1, 1)
-
-
-y = df['Target']
-X = df.drop('Target', axis = 1)
-
-
-obj.custom_compile(X, y, 1000, alpha = 0.001)
-plt.plot(obj.loss_list)
-plt.plot(obj.w1_list)
-plt.plot(obj.w2_list)
+df=pd.read_csv(r"C:\Users\amana\Downloads\iris(For PCA Program).csv")
+x=df.drop('species',axis=1)
+y=df['species']
+cov=np.cov(x.T)
+egval,egvec=np.linalg.eig(cov)
+print(egval,egvec)
+s_ind=np.argsort(egval)[::-1]
+s_egval=egval[s_ind]
+s_egvec=egvec[:,s_ind]
+eig_sub=s_egvec[:,:2]
+x_red=np.dot(eig_sub.transpose(),x.transpose()).transpose()
+plt.scatter(x_red[:,0],x_red[:,-1],c=y)
+plt.xlabel("pc1")
+plt.ylabel("pc2")
 plt.show()
-obj.accuracy(y,X)
-obj.y_pred_list
-obj.predict([34.623660	,78.024693])
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+PART-B
+1> Random Forest
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+data=pd.read_csv(r"C:\Users\amana\Downloads\pima.csv")
+data.head()
+X = data.drop("Outcome", axis=1)
+y = data["Outcome"]
+# split into train and test set
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, stratify=y, test_size=0.20)
+# create the classifier
+classifier = RandomForestClassifier(n_estimators=100)
+# Train the model using the training sets
+classifier.fit(X_train, y_train)
+# predicting on the test set
+y_pred = classifier.predict(X_test)
+print(accuracy_score(y_test,y_pred))
+# check Important features
+feature_importances_df = pd.DataFrame({"feature": list(X.columns), "importance": classifier.feature_importances_})
+
+# Display
+feature_importances_df
+x=data.drop(['Outcome','SkinThickness'],axis=1)
+y=data['Outcome']
+x_tr,x_te,y_tr,y_te=train_test_split(x,y)
+classifier.fit(x_tr,y_tr)
+y_pred=classifier.predict(x_te)
+print("accuracy: ", accuracy_score(y_te,y_pred))
+#comparison with decision tree
+
+from sklearn.tree import DecisionTreeClassifier 
+dt=DecisionTreeClassifier()
+dt.fit(x_tr,y_tr)
+y_pr=dt.predict(x_te)
+print("accuracy: ",accuracy_score(y_te,y_pr))
+-------------------------------------------------------------------------------------------------
+2>SVM
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split,GridSearchCV # Import train_test_split function
+from sklearn.svm import SVC #Import svm model
+from sklearn.metrics import accuracy_score,confusion_matrix,classification_report,precision_score,recall_score
+data=pd.read_csv(r"C:\Users\amana\Downloads\glass.csv")
+data.head()
+x = data.drop('Type',axis = 1) 
+y = data['Type']
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3)
+model1=SVC(kernel='sigmoid',gamma=0.001)
+model2=SVC(kernel='poly',degree=3)
+model3=SVC(kernel='rbf')
+model1.fit(x_train,y_train)
+model2.fit(x_train,y_train)
+model3.fit(x_train,y_train)
+ypred1=model1.predict(x_test)
+ypred2=model2.predict(x_test)
+ypred3=model3.predict(x_test)
+print(accuracy_score(y_test,ypred1))
+print(accuracy_score(y_test,ypred2))
+print(accuracy_score(y_test,ypred3))
+--------------------------------------------------------------------------------------------
+3>Naive BAYES
+
+import pandas as pd
+import numpy as np
+from sklearn import preprocessing
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report,roc_curve
+from sklearn.model_selection import train_test_split
+data = pd.read_csv(r"C:\Users\amana\Downloads\covid.csv")
+le = preprocessing.LabelEncoder()
+pc = le.fit_transform(data['pc'].values)
+wbc = le.fit_transform(data['wbc'].values)
+mc = le.fit_transform(data['mc'].values)
+ast = le.fit_transform(data['ast'].values)
+bc = le.fit_transform(data['bc'].values)
+ldh = le.fit_transform(data['ldh'].values)
+y = le.fit_transform(data['diagnosis'].values)
+X = np.array(list(zip(pc, wbc, mc, ast, bc, ldh)))
+xtrain, xtest, ytrain, ytest = train_test_split(X, y, test_size=0.25)
+naivee = MultinomialNB()
+naivee.fit(xtrain, ytrain)
+ypred = naivee.predict(xtest)
+print("Accuracy: ", accuracy_score(ytest, ypred))
+print("Classification Report: \n", classification_report(ytest, ypred))
+lr_probs = naivee.predict_proba(xtest)[:,1]
+lr_fpr, lr_tpr, _=roc_curve(ytest, lr_probs)
+from matplotlib import pyplot
+pyplot.plot(lr_fpr, lr_tpr,label='Naive Bayes Classifier')
+# axis labels
+pyplot.xlabel('False Positive Rate')
+pyplot.ylabel('True Positive Rate')
+# show the legend
+pyplot.legend()
+# show the plot
+pyplot.show()
